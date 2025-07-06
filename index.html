@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Snowy Apology with Falling Snow</title>
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      height: 100%; overflow: hidden;
+      font-family: 'Segoe UI', sans-serif;
+      background: url('pexels-urtimud-89-76108288-32261648.jpg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+      color: white;
+    }
+    .overlay {
+      position: absolute; top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.4);
+      z-index: 1;
+    }
+    .snow {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 3;
+    }
+    .container {
+      position: relative; z-index: 2;
+      height: 100%;
+      display: flex; flex-direction: column;
+      justify-content: center; align-items: center;
+      text-align: center;
+      padding: 20px;
+    }
+    input, button {
+      padding: 12px 20px; margin: 10px;
+      border: none; border-radius: 8px; font-size: 18px;
+    }
+    button {
+      color: #ffffff;
+      background-image: linear-gradient(to right, #f87171, #ef4444, #dc2626);
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.875rem;
+      padding: 0.625rem 1.25rem;
+      text-align: center;
+      margin-inline-end: 0.5rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: background-image 0.3s ease;
+    }
+    button:hover {
+      background-image: linear-gradient(to bottom right, #f87171, #ef4444, #dc2626);
+    }
+    button:focus {
+      outline: none;
+      box-shadow: 0 0 0 4px #fca5a5;
+    }
+    @media (prefers-color-scheme: dark) {
+      button:focus {
+        box-shadow: 0 0 0 4px #991b1b;
+      }
+    }
+    .message, .emoji {
+      margin-top: 20px;
+      animation: fadeIn 2.5s ease-in-out;
+    }
+    .message { font-size: 28px; }
+    .emoji { font-size: 60px; animation: pulse 2s infinite; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes pulse {
+      0%,100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    .audio-bg { display: none; }
+    .hero-text {
+      position: absolute;
+      top: 10%;
+      width: 100%;
+      text-align: center;
+      z-index: 5;
+    }
+    .normal-text {
+      font-size: 60px;
+      color: #ffffff;
+      text-shadow: 0 0 10px rgba(255,255,255,0.3);
+      animation: fadeZoom 2s ease-in-out forwards;
+    }
+    .special-text {
+      font-size: 80px;
+      font-weight: bold;
+      color: #80ccff;
+      text-shadow: 0 0 5px #fff, 0 0 10px #f0a, 0 0 20px #f0a;
+      animation: heartPop 3s ease-in-out forwards;
+    }
+    @keyframes fadeZoom {
+      0% { opacity: 0; transform: scale(0.6) translateY(-20px); filter: blur(2px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0px); }
+    }
+    @keyframes heartPop {
+      0% { opacity: 0; transform: scale(0.4); filter: blur(4px); }
+      50% { opacity: 1; transform: scale(1.3); filter: blur(0px); }
+      100% { transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="overlay"></div>
+  <canvas class="snow"></canvas>
+  <div class="container">
+    <div id="msg" class="message"></div>
+    <div id="emo" class="emoji"></div>
+    <h1 id="enterNameText">Enter Your Name</h1>
+    <input type="text" id="nameInput" placeholder="Your name...">
+    <button onclick="display()">Reveal Magic</button>
+    <div class="hero-text"><h1 id="animatedName"></h1></div>
+    
+  </div>
+  <audio class="audio-bg" autoplay loop>
+    <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3" type="audio/mpeg">
+  </audio>
+  <script>
+    const sName = "sumanya";
+    const maxApology = 2;
+    let count = parseInt(localStorage.getItem(`${sName}_count`)) || 0;
+
+    const quotes = [
+     "Student life is the most adventurous phase of life.",
+  "Dream big, work hard, stay humble.",
+  "Every expert was once a beginner.",
+  "Learning never exhausts the mind.",
+  "A little progress each day adds up to big results.",
+  "Make mistakes, learn lessons, move forward.",
+  "Student life teaches us discipline and dedication.",
+  "Books are a uniquely portable magic.",
+  "Study while others are sleeping.",
+  "The beautiful thing about learning is that no one can take it away from you.",
+  "Push yourself because no one else is going to do it for you.",
+  "Work hard in silence, let success make the noise.",
+  "Believe in yourself and all that you are.",
+  "Education is the most powerful weapon to change the world.",
+  "Strive for progress, not perfection.",
+  "Doubt kills more dreams than failure ever will.",
+  "Success is no accident. It is hard work and perseverance.",
+  "Be so good they can't ignore you.",
+  "Discipline is the bridge between goals and accomplishment.",
+  "There are no shortcuts to any place worth going.",
+  "The future belongs to those who prepare for it today.",
+  "Success doesn’t come to you, you go to it.",
+  "Stay curious, stay learning.",
+  "The roots of education are bitter, but the fruit is sweet.",
+  "It always seems impossible until it’s done.",
+  "Education is not preparation for life; education is life itself.",
+  "The best way to predict the future is to create it.",
+  "Don’t wish for it, work for it.",
+  "Today a reader, tomorrow a leader.",
+  "You don’t have to be great to start, but you have to start to be great.",
+  "The best view comes after the hardest climb.",
+  "If it doesn’t challenge you, it won’t change you.",
+  "Success is the sum of small efforts repeated day in and day out.",
+  "Act as if what you do makes a difference. It does.",
+  "Champions keep playing until they get it right.",
+  "Success only comes to those who dare to attempt.",
+  "Nothing will work unless you do.",
+  "Don’t let what you cannot do interfere with what you can do.",
+  "If you’re going through hell, keep going.",
+  "Winners never quit and quitters never win.",
+  "Hard work beats talent when talent doesn’t work hard.",
+  "One day, all your hard work will pay off.",
+  "Don’t stop until you’re proud.",
+  "No pressure, no diamonds.",
+  "Small steps in the right direction can turn out to be the biggest step of your life.",
+  "Learn as if you will live forever, live like you will die tomorrow.",
+  "Don’t limit your challenges, challenge your limits.",
+  "Great things never come from comfort zones.",
+  "Difficult roads often lead to beautiful destinations.",
+  "Stay focused and never give up."
+    ];
+
+    function capitalize(s) {
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    }
+
+    function display() {
+      const name = document.getElementById('nameInput').value.trim().toLowerCase();
+      const msg = document.getElementById('msg');
+      const emo = document.getElementById('emo');
+      const animatedName = document.getElementById('animatedName');
+
+      msg.innerHTML = "";
+      emo.innerHTML = "";
+      animatedName.innerHTML = "";
+
+      if (name === sName) {
+        count++;
+        localStorage.setItem(`${sName}_count`, count);
+        if (count <= maxApology) {
+          animatedName.textContent = `💖 Sorry ${capitalize(sName)} 💖`;
+          animatedName.className = "special-text";
+          msg.innerHTML = "I'm truly sorry for yesterday’s words.";
+          emo.innerHTML = '🥺';
+        } else {
+           const q = quotes[Math.floor(Math.random() * quotes.length)];
+         animatedName.textContent = `✨ ${capitalize(name)} ✨`;
+        animatedName.className = "normal-text";
+        msg.innerHTML = `<em>"${q}"</em>`;
+        emo.innerHTML = '📘';
+        }
+      } else {
+        const q = quotes[Math.floor(Math.random() * quotes.length)];
+       animatedName.textContent = `✨ ${capitalize(name)} ✨`;
+        animatedName.className = "normal-text";
+        msg.innerHTML = `<em>"${q}"</em>`;
+        emo.innerHTML = '📘';
+      }
+    }
+
+    // Snowfall effect using canvas
+    const canvas = document.querySelector('.snow');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = window.innerWidth;
+    let H = canvas.height = window.innerHeight;
+    const flakes = Array.from({ length: 200 }, () => ({
+      x: Math.random() * W,
+      y: Math.random() * H,
+      r: Math.random() * 4 + 1,
+      d: Math.random() * 200
+    }));
+
+    function drawSnow() {
+      ctx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'white';
+      ctx.beginPath();
+      for (let f of flakes) {
+        ctx.moveTo(f.x, f.y);
+        ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2);
+      }
+      ctx.fill();
+      updateSnow();
+    }
+
+    function updateSnow() {
+      for (let f of flakes) {
+        f.y += Math.cos(f.d) * 0.5 + f.r / 2;
+        f.x += Math.sin(0.5) * 2;
+        if (f.y > H) {
+          f.y = -f.r;
+          f.x = Math.random() * W;
+        }
+      }
+    }
+
+    function anim() {
+      drawSnow();
+      requestAnimationFrame(anim);
+    }
+
+    anim();
+    window.addEventListener('resize', () => {
+      W = canvas.width = window.innerWidth;
+      H = canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
