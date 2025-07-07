@@ -2,8 +2,52 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snowy Apology with Falling Snow</title>
   <style>
+    body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+    @media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+
+  .hero-text h1 {
+    font-size: 40px;
+  }
+
+  .special-text {
+    font-size: 40px;
+  }
+
+  .normal-text {
+    font-size: 30px;
+  }
+
+  .message {
+    font-size: 18px;
+  }
+
+  .emoji {
+    font-size: 40px;
+  }
+
+  input, button {
+    width: 90%;
+    font-size: 16px;
+    padding: 10px;
+  }
+
+  h1#enterNameText {
+    font-size: 22px;
+  }
+}
+
     html, body {
       margin: 0; padding: 0;
       height: 100%; overflow: hidden;
@@ -127,7 +171,7 @@
   </audio>
   <script>
     const sName = "SUMANYADAS";
-    const maxApology = 2;
+    const maxApology = 50;
     let count = parseInt(localStorage.getItem(`${sName}_count`)) || 0;
 
     const quotes = [
@@ -197,14 +241,16 @@
       emo.innerHTML = "";
       animatedName.innerHTML = "";
 
-      if (name === sName) {
+      if (name.toLowerCase() === sName.toLowerCase()) {
+        console.log(name+"&"+sName);
+        console.log(count)
         count++;
         localStorage.setItem(`${sName}_count`, count);
         if (count <= maxApology) {
           animatedName.textContent = `💖 Sorry ${capitalize(sName)} 💖`;
           animatedName.className = "special-text";
-          msg.innerHTML = "I'm truly sorry for yesterday’s words.";
-          emo.innerHTML = '🥺';
+          msg.innerHTML = "I'm truly sorry for previous words that you hurted.";
+          emo.innerHTML = '🥺🙏🙇';
         } else {
            const q = quotes[Math.floor(Math.random() * quotes.length)];
          animatedName.textContent = `✨ ${capitalize(name)} ✨`;
@@ -266,6 +312,34 @@
       W = canvas.width = window.innerWidth;
       H = canvas.height = window.innerHeight;
     });
+      // Disable PrintScreen key
+  window.addEventListener("keyup", function (e) {
+    if (e.key === "PrintScreen") {
+      navigator.clipboard.writeText("Screenshots are disabled on this page.");
+      alert("Screenshot is disabled ❌");
+    }
+  });
+
+  // Block Ctrl+S, Ctrl+P, Ctrl+Shift+I, F12
+  document.addEventListener("keydown", function (e) {
+    if (
+      (e.ctrlKey && (e.key === "p" || e.key === "s")) ||
+      (e.ctrlKey && e.shiftKey && e.key === "I") ||
+      e.key === "F12"
+    ) {
+      e.preventDefault();
+      alert("This action is disabled.");
+    }
+  });
+  // Disable right-click context menu
+document.addEventListener("contextmenu", (e) => {
+  e.preventDefault();
+  alert("Right click is disabled to protect content.");
+});
+
+// Disable text selection
+document.addEventListener("selectstart", (e) => e.preventDefault());
+
   </script>
 </body>
 </html>
